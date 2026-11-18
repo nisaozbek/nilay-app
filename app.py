@@ -12,6 +12,18 @@ BASE = Path(__file__).parent  # resimler app.py ile aynı klasörde olmalı
 st.markdown(
     """
     <style>
+            .stApp {
+        background: linear-gradient(135deg, #ffe4ec, #e8d5ff);
+    }
+            .stApp, .stApp p, .stApp h1, .stApp h2, .stApp h3, .stApp span, .stApp label {
+        color: #c2185b !important;
+    }
+    .kart-baslik, .madde, .baslik {
+        color: #c2185b !important;
+    }
+    .stApp button p {
+        color: #c2185b !important;
+    }
     .intro {
         display:flex; justify-content:center; align-items:center;
         height:70vh; font-size:7rem; font-weight:800; letter-spacing:1.5rem;
