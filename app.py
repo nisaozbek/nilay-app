@@ -12,13 +12,10 @@ BASE = Path(__file__).parent  # resimler app.py ile aynı klasörde olmalı
 st.markdown(
     """
     <style>
-            .stApp {
-        background: linear-gradient(135deg, #ffe4ec, #e8d5ff);
+    .stApp {
+        background-color: #ffe4ec;
     }
-            .stApp, .stApp p, .stApp h1, .stApp h2, .stApp h3, .stApp span, .stApp label {
-        color: #c2185b !important;
-    }
-    .kart-baslik, .madde, .baslik {
+    .stApp, .stApp p, .stApp h1, .stApp h2, .stApp h3, .stApp span, .stApp label {
         color: #c2185b !important;
     }
     .stApp button p {
@@ -27,21 +24,21 @@ st.markdown(
     .intro {
         display:flex; justify-content:center; align-items:center;
         height:70vh; font-size:7rem; font-weight:800; letter-spacing:1.5rem;
-        color:#e91e63; text-shadow:0 0 25px rgba(233,30,99,.6);
+        color:#c2185b !important; text-shadow:0 0 25px rgba(194,24,91,.4);
     }
     .cursor { animation: blink .7s infinite; }
     @keyframes blink { 50% { opacity:0; } }
-    .baslik { text-align:center; font-size:3rem; font-weight:800; color:#e91e63; }
-    .kart-baslik { text-align:center; font-weight:700; font-size:1.1rem; margin:.4rem 0; }
+    .baslik { text-align:center; font-size:3rem; font-weight:800; color:#c2185b !important; }
+    .kart-baslik { text-align:center; font-weight:700; font-size:1.1rem; margin:.4rem 0; color:#c2185b !important; }
     .resim-kutu { position:relative; }
     .resim-kutu img { width:100%; border-radius:12px; display:block; }
-    .resim-kutu span {
+    .stApp .resim-kutu span {
         position:absolute; left:0; right:0; bottom:0; padding:12px;
-        text-align:center; font-weight:800; color:white; font-size:1.2rem;
+        text-align:center; font-weight:800; color:white !important; font-size:1.2rem;
         background:linear-gradient(transparent, rgba(0,0,0,.8));
         border-radius:0 0 12px 12px;
     }
-    .madde { font-size:1.6rem; padding:.5rem 0; }
+    .madde { font-size:1.6rem; padding:.5rem 0; color:#c2185b !important; }
     </style>
     """,
     unsafe_allow_html=True,
@@ -50,7 +47,7 @@ st.markdown(
 
 # ---------- Yardımcılar ----------
 def resim_bul(ad):
-    """Resmi bulur; jpeg/jpg/JPEG gibi uzantı farklarını da dener."""
+    """Resmi bulur; jpeg/jpg/png uzantı farklarını da dener."""
     p = BASE / ad
     if p.exists():
         return p
@@ -87,6 +84,11 @@ def sayfa_git(ad):
     st.session_state.sayfa = ad
 
 
+def resim_ac_kapa(anahtar):
+    k = f"goster_{anahtar}"
+    st.session_state[k] = not st.session_state.get(k, False)
+
+
 # ---------- Durum ----------
 if "sayfa" not in st.session_state:
     st.session_state.sayfa = "ana"
@@ -113,7 +115,7 @@ if not st.session_state.intro_bitti:
 KATEGORILER = [
     ("tanitim", "UYGULAMA TANITIMI", "uygulama tanıtımı.jpeg"),
     ("fedakarlik", "NİLAYIN FEDAKARLIKLARI", "nilayın fedakarlıkları.jpeg"),
-    ("kavga", "KAVGALARIMIZ", "kavgalarımız.jpeg"),
+    ("kavga", "BİRBİRİMİZİ DE YERİZ SAN SEBASTİAN DA", "kavgalarımız.jpeg"),
     ("ask", "NİLAY'IN AŞKLARI", "nilayın aşkları.jpeg"),
     ("staj", "NİLAYIN STAJI", "nilayın stajı.jpeg"),
 ]
@@ -142,13 +144,6 @@ def geri_butonu():
     st.button("⬅ Geri", on_click=sayfa_git, args=("ana",))
 
 
-def maddeler(baslik, liste):
-    geri_butonu()
-    st.header(baslik)
-    for m in liste:
-        st.markdown(f'<div class="madde">{m}</div>', unsafe_allow_html=True)
-
-
 def tanitim():
     geri_butonu()
     st.header("UYGULAMA TANITIMI")
@@ -159,6 +154,65 @@ def tanitim():
         yazili_resim("uygulamanın sahibi.jpeg", "UYGULAMANIN SAHİBİ")
     with c3:
         yazili_resim("manevi motivasyoncu.jpeg", "MANEVİ MOTİVASYONCU")
+
+
+def resimli_maddeler(baslik, liste):
+    """Her maddenin yanında 'Tıkla' butonu olur, basınca resim açılır/kapanır.
+    liste: (madde metni, resim dosyası, benzersiz anahtar)"""
+    geri_butonu()
+    st.header(baslik)
+    for metin, resim, anahtar in liste:
+        c1, c2 = st.columns([4, 1])
+        with c1:
+            st.markdown(f'<div class="madde">{metin}</div>', unsafe_allow_html=True)
+        with c2:
+            st.button("Tıkla", key=f"btn_{anahtar}", on_click=resim_ac_kapa, args=(anahtar,))
+        if st.session_state.get(f"goster_{anahtar}", False):
+            p = resim_bul(resim)
+            if p:
+                st.image(str(p), width=400)
+            else:
+                st.warning(f"'{resim}' bulunamadı")
+
+
+def fedakarlik():
+    resimli_maddeler(
+        "NİLAYIN FEDAKARLIKLARI",
+        [
+            ("1-) Nisa'ya 2 flört yaptı.", "rulo.jpeg", "rulo"),
+            ("2-) Ceydaya caminin önünde manifest yaptı.", "cami.jpeg", "cami"),
+        ],
+    )
+
+
+def kavga():
+    resimli_maddeler(
+        "BİRBİRİMİZİ DE YERİZ SAN SEBASTİAN DA",
+        [
+            ("1-) Nilay Ankaraya gelmedi", "ankara.jpeg", "ankara"),
+            ("2-) Nilay sandiviçi beğenmedi.", "sandiviç.jpeg", "sandivic"),
+        ],
+    )
+
+
+def ask():
+    geri_butonu()
+    st.header("NİLAY'IN AŞKLARI")
+    liste = [
+        ("1-) AHMET: Kübra kaptı.", "https://youtu.be/xHICL1-Ps34?si=X8o00xMGrt3yoC2u"),
+        ("2-) YUSUF: En büyük aşkı.", "https://youtu.be/cdMmUasRqro?si=i1EAwtbVDKrc4RWU"),
+        ("3-) MUHSİN: İlan-ı aşk yaptı.", "https://youtu.be/GcU6hWpPvCU?si=Msdt02QGFWDOpLf6"),
+        ("4-) MEHMET: Kahtalı.", "https://youtu.be/xelzK5nq-8w?si=dBFA3Z890t4wEWfo"),
+        ("5-) BAYRAM: Kendini Kurtlar Vadisi Polat sanan çocuk.", "https://youtube.com/shorts/81N2CZ0Acnc?si=ieCzbJaQqxA0zems"),
+        ("6-) EYÜP CAN: Küçük çocuk.", "https://youtu.be/CBUdZIut0OA?si=qIqudrWERPnfWmfU"),
+        ("7-) FERHAN: Nişanlandı.", "https://youtu.be/TuLmRVugdFo?si=v_XwOSnbJR9ix9vD"),
+    ]
+    for metin, link in liste:
+        c1, c2 = st.columns([4, 1])
+        with c1:
+            st.markdown(f'<div class="madde">{metin}</div>', unsafe_allow_html=True)
+        with c2:
+            st.link_button("İzle ▶", link)
 
 
 def staj():
@@ -176,30 +230,10 @@ if sayfa == "ana":
 elif sayfa == "tanitim":
     tanitim()
 elif sayfa == "fedakarlik":
-    maddeler(
-        "NİLAYIN FEDAKARLIKLARI",
-        [
-            "1-) Nisa için drj banksın instagramını aldı.",
-            "2-) Ceydaya caminin önünde manifest yaptı.",
-        ],
-    )
+    fedakarlik()
 elif sayfa == "kavga":
-    maddeler(
-        "KAVGALARIMIZ",
-        ["1-) Nilay Ankaraya gelmedi", "2-) Nilay sandiviçi beğenmedi."],
-    )
+    kavga()
 elif sayfa == "ask":
-    maddeler(
-        "NİLAY'IN AŞKLARI",
-        [
-            "1-) AHMET",
-            "2-) YUSUF",
-            "3-) MUHSİN",
-            "4-) MEHMET",
-            "5-) BAYRAM",
-            "6-) EYÜP CAN",
-            "7-) FERHAN (nişanlandı)",
-        ],
-    )
+    ask()
 elif sayfa == "staj":
     staj()
